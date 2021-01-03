@@ -74,11 +74,13 @@ function do_start {
 }
 
 function print_help {
-    echo
+    echo ""
     printf "Enter menu: \e[96;1mssh -t $USER@$IP menu \e[0m\n"
-    echo
-    echo "==========About your container:"
+    echo ""
+}
 
+function print_about {
+    echo "==========About your container:"
     INFO=$(lxc info $USER)
     PORT=$(cat /var/scripts/ports/$USER)
     echo "$INFO" | grep Running > /dev/null 2>&1
@@ -96,7 +98,7 @@ function print_help {
 
     printf "File sharing is encouraged, access data at \e[96;1m/mnt/ssd\e[0m.\n"
     printf "\nSee GPU load: \e[96;1mnvidia-smi\e[0m.\n    memory usage: \e[96;1mfree -h\e[0m.\n    disk usage: \e[96;1mdf -h\e[0m.\n "
-    echo " "
+    echo ""
 }
 
 function menu {
@@ -151,6 +153,7 @@ function menu {
 printf "\n\n Hi, \e[96;1m$USER\e[0m\n"
 echo " You're using the GPU Server in MAIL-ECNU."
 if [ "$2" == "menu" ]; then
+    print_about
     menu
 else
     print_help
