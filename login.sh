@@ -93,7 +93,7 @@ function print_about {
     echo "username: ubuntu"
     echo "ssh port: $PORT"
     echo
-    printf "Connect your container directly via \`\e96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
+    printf "Connect your container directly via \`\e[96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
     echo "Transfer data to the container directly using scp or sftp with info above."
 
     printf "File sharing is encouraged, access data at \e[96;1m/mnt/ssd\e[0m.\n"
