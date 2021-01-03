@@ -17,8 +17,9 @@ fi
 
 # create user
 echo "Creating user..."
-sudo useradd -m -s /bin/bash -G lxd $USERNAME
+sudo useradd -m -s /var/scripts/login.sh -G lxd $USERNAME
 
+# <<<<
 printf "Allocating container for \e[96;1m$USERNAME\e[0m...\n"
 
 # config the container
@@ -36,17 +37,14 @@ lxc config device add ${USERNAME} sshproxy proxy listen=tcp:0.0.0.0:$PORT connec
 
 # map uid
 # lxc config device add $USERNAME door disk source=/home/$USERNAME path=/root/door
-printf "uid $(id $USERNAME -u) 0\ngid $(id $USERNAME -g) 0" | lxc config set $USERNAME raw.idmap -
+printf "uid $(id $USERNAME -u) 1000\ngid $(id $USERNAME -g) 1000" | lxc config set $USERNAME raw.idmap -
 
 # password
 echo "set password for $USERNAME now (host only)."
 sudo passwd $USERNAME
 
 echo "Login this host via \`ssh <username>@<host-ip>\` to manage your container."
-
-# bashrc
-printf '\nif [[ $- =~ i ]]; then\n    exec /var/scripts/login.sh\nfi\n' | sudo tee -a /home/$USERNAME/.bashrc
-sudo chown root:root /home/$USERNAME/.bashrc /home/$USERNAME/.profile
+# >>>>
 
 echo "Done!"
 
