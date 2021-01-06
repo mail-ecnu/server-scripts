@@ -18,7 +18,7 @@ fi
 # create user
 echo "Creating user..."
 sudo useradd -m -s /var/scripts/login.sh -G lxd $USERNAME
-
+sudo touch /home/$USERNAME/.hushlogin
 # <<<<
 printf "Allocating container for \e[96;1m$USERNAME\e[0m...\n"
 

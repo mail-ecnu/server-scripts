@@ -86,19 +86,20 @@ function print_about {
     echo "$INFO" | grep Running > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         printf "\e[96;1mYour container is not running.\e[0m\n"
+        do_start
     else
         printf "\e[96;1mYour container is running.\e[0m\n"
-    fi
-    echo
-    echo "username: ubuntu"
-    echo "ssh port: $PORT"
-    echo
-    printf "Connect your container directly via \`\e[96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
-    echo "Transfer data to the container directly using scp or sftp with info above."
+        echo
+        echo "username: ubuntu"
+        echo "ssh port: $PORT"
+        echo
+        printf "Connect your container directly via \`\e[96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
+        echo "Transfer data to the container directly using scp or sftp with info above."
 
-    printf "File sharing is encouraged, access data at \e[96;1m/mnt/ssd\e[0m.\n"
-    printf "\nSee GPU load: \e[96;1mnvidia-smi\e[0m.\n    memory usage: \e[96;1mfree -h\e[0m.\n    disk usage: \e[96;1mdf -h\e[0m.\n "
-    echo ""
+        printf "File sharing is encouraged, access data at \e[96;1m/mnt/ssd\e[0m.\n"
+        printf "\nSee GPU load: \e[96;1mnvidia-smi\e[0m.\n    memory usage: \e[96;1mfree -h\e[0m.\n    disk usage: \e[96;1mdf -h\e[0m.\n "
+        echo ""
+    fi
 }
 
 function menu {
