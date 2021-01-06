@@ -153,7 +153,7 @@ function menu {
 
 printf "\n\n Hi, \e[96;1m$USER\e[0m\n"
 echo " You're using the GPU Server in MAIL-ECNU."
-if [ "$2" == "menu" ]; then
+if [ "$2" == "menu" ] && [[ "$(tty)" == /dev/* ]]; then
     print_about
     menu
 else
