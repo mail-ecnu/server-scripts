@@ -12,6 +12,34 @@ function do_passwd {
     passwd $USER
 }
 
+function do_container_passwd {
+    echo "========== Changing your password (container only)..."
+    INFO=$(lxc info $USER)
+    echo "$INFO" | grep Running > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "It seems that your container is not running."
+    else
+        lxc exec $USER -- passwd ubuntu
+        if [ $? -eq 0 ]; then
+            touch /var/scripts/passwd/$USER
+        fi
+    fi
+}
+
+function do_public_key {
+    echo "========== Import your public keys (container only, press CTRL+D to stop)..."
+    INFO=$(lxc info $USER)
+    echo "$INFO" | grep Running > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "It seems that your container is not running."
+    else
+        lxc exec $USER -- su ubuntu -s /bin/sh -c 'cd; umask 077; mkdir -p .ssh &&   { [ -z `tail -1c .ssh/authorized_keys 2>/dev/null` ] || echo >> .ssh/authorized_keys; } &&   cat >> .ssh/authorized_keys ||   exit 1; if type restorecon >/dev/null 2>&1; then   restorecon -F .ssh .ssh/authorized_keys; fi '
+        if [ $? -eq 0 ]; then
+            touch /var/scripts/passwd/$USER
+        fi
+    fi
+}
+
 function allocate_port {
     echo "========== Preserve a port for your application, e.g. tensorboard, jupyter ..."
     PORT=$(cat /var/scripts/ports/$USER)
@@ -39,14 +67,6 @@ function release_port {
     echo "Done."
 }
 
-function set_container_passwd {
-    lxc exec $USER -- passwd ubuntu
-    if [ $? -ne 0 ]; then
-	set_container_passwd
-	return
-    fi
-}
-
 function do_start {
     PORT=$(cat /var/scripts/ports/$USER)
     INFO=$(lxc info $USER)
@@ -61,15 +81,12 @@ function do_start {
     else
         echo "It seems that your container is running."
     fi
+    printf "Connect your container directly via \`\e[96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
     if [ ! -f /var/scripts/passwd/$USER ]; then
-        echo "Please set your container password."
-	set_container_passwd
-	touch /var/scripts/passwd/$USER
-	echo ""
-    	printf "Connect your container directly via \`\e[96;1mssh ubuntu@$IP -p $PORT\e[0m\`.\n"
+        printf "It seems that you should \e[96;1mset your container password\e[0m or \e[96;1mimport your public key\e[0m before you login."
     fi
     if [ ! -L $HOME/home-in-container ];then
-        ln -s /var/lib/lxd/storage-pools/zfs-pool/containers/$USER/rootfs/home/ubuntu $HOME/home-in-container
+        ln -s /var/lib/lxd/containers/$USER/rootfs/home/ubuntu $HOME/home-in-container
     fi
 }
 
@@ -107,9 +124,11 @@ function menu {
     echo "===== main menu  ====="
     echo "[1] start your container"
     echo "[2] stop your container"
-    echo "[3] change your password"
-    echo "[4] allocate ports"
-    echo "[5] release ports"
+    echo "[3] change your password (host)"
+    echo "[4] change your password (container)"
+    echo "[5] import your public key"
+    echo "[6] allocate ports"
+    echo "[7] release ports"
     echo "[0] show info"
     echo "[x] exit"
     read -p "Enter your choice: " op
@@ -126,10 +145,18 @@ function menu {
         read -p "Press any key to continue..." -n 1 -r
         menu
     elif [ "$op" == "4" ];
-        then allocate_port
+        then do_container_passwd
         read -p "Press any key to continue..." -n 1 -r
         menu
     elif [ "$op" == "5" ];
+        then do_public_key
+        read -p "Press any key to continue..." -n 1 -r
+        menu
+    elif [ "$op" == "6" ];
+        then allocate_port
+        read -p "Press any key to continue..." -n 1 -r
+        menu
+    elif [ "$op" == "7" ];
         then release_port
         read -p "Press any key to continue..." -n 1 -r
         menu
